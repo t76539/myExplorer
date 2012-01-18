@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -26,11 +27,18 @@ import java.util.HashMap;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 import java.util.Enumeration;
 import java.io.InputStream;
 import java.io.FileOutputStream;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
+
+import android.widget.BaseAdapter;
+import android.content.Context;
+import android.view.ViewGroup;
 
 public class MyExplorerActivity extends ListActivity {
 	
@@ -38,85 +46,94 @@ public class MyExplorerActivity extends ListActivity {
 	private List<String> path = null;
 	private String root="/";
 	private TextView myPath;
+    private String[] afiles = null;
 
 	@Override
-  public void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      setContentView(R.layout.main);
-      myPath = (TextView)findViewById(R.id.path);
-//      myPath.setTextSize(28);
-//    getDir("/sdcard/My Files/Books");
-    getDir("/sdcard/books");
-//      getDir(root);
-  }
+	public void onCreate(Bundle savedInstanceState) {
+	      super.onCreate(savedInstanceState);
+	      setContentView(R.layout.main);
+	      myPath = (TextView)findViewById(R.id.path);
+//	      myPath.setTextSize(28);
+//	    getDir("/sdcard/My Files/Books");
+	      getDir("/sdcard/books");
+//	      getDir(root);
+		  Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.pulse);
+		  ImageView iv = (ImageView)findViewById(R.id.imageView1);
+		  iv.setImageBitmap(bmp);
+	}
 
-  private void getDir(String dirPath) {
+	private void getDir(String dirPath) {
+	      myPath.setText("Положение: " + dirPath);
+	      item = new ArrayList<String>();
+	      path = new ArrayList<String>();
 
-      myPath.setText("Положение: " + dirPath);
-      item = new ArrayList<String>();
-      path = new ArrayList<String>();
+	      File f = new File(dirPath);
+	      File[] files = f.listFiles();
 
-      File f = new File(dirPath);
-      File[] files = f.listFiles();
+	      if(!dirPath.equals(root)) {
+//	          item.add(root);
+//	          path.add(root);
+	          item.add("../");
+	          path.add(f.getParent());
+	      }
 
-      if(!dirPath.equals(root)) {
-//          item.add(root);
-//          path.add(root);
-          item.add("../");
-          path.add(f.getParent());
-      }
+	      for (int i=0; i < files.length; i++) {
+	          File file = files[i];
+	          path.add(file.getPath());
+	          if(file.isDirectory())
+	          	item.add(file.getName() + "/");
+	          else
+	          	item.add(file.getName());
+	      }
 
-      for (int i=0; i < files.length; i++) {
-          File file = files[i];
-          path.add(file.getPath());
-          if(file.isDirectory())
-          	item.add(file.getName() + "/");
-          else
-          	item.add(file.getName());
-      }
+	      //ArrayAdapter<String> fileList = new ArrayAdapter<String>(this, R.layout.item, R.id.rowtext, item);
+	      //setListAdapter(fileList);
+	      /*
+	      SimpleAdapter adapter = new SimpleAdapter(this, createItemList(), R.layout.item, 
+	              new String[] {"title1", "title2", "image"}, 
+	              new int[] {R.id.rowtext, R.id.rowtext2, R.id.image});
+	      */
+	      ItemsAdapter adapter = new ItemsAdapter(this, new String[] {"1", "2", "3"});
+	      setListAdapter(adapter);
+	}
 
-      //ArrayAdapter<String> fileList = new ArrayAdapter<String>(this, R.layout.item, R.id.rowtext, item);
-      //setListAdapter(fileList);
-    
-      SimpleAdapter adapter = new SimpleAdapter(this, createSensorsList(), R.layout.item, 
-              new String[] {"title1", "title2"}, 
-              new int[] {R.id.rowtext, R.id.rowtext2});
-      setListAdapter(adapter);
-  }
-
-  private List<Map<String, ?>> createSensorsList() {
-	  List<Map<String, ?>> items = new ArrayList<Map<String, ?>>();
-	  
-	  for (int i = 0; i < item.size(); i++) {
-		  Map<String, Object> map = new HashMap<String, Object>();
+	private List<Map<String, ?>> createItemList() {
+		  List<Map<String, ?>> items = new ArrayList<Map<String, ?>>();
 		  
-		  String filename = path.get(i);
-		  String ext = getFileExt( item.get(i).toLowerCase() );
-		  if (ext.contains(".zip")) {
-			  String fname = getZIP(filename);
-			  if (0 < fname.length()) {
-				  ext = ".fb2.zip";
-				  filename = fname;
+		  for (int i = 0; i < item.size(); i++) {
+			  Map<String, Object> map = new HashMap<String, Object>();
+			  
+			  String filename = path.get(i);
+			  String ext = getFileExt( item.get(i).toLowerCase() );
+			  if (ext.contains(".zip")) {
+				  String fname = getZIP(filename);
+				  if (0 < fname.length()) {
+					  ext = ".fb2.zip";
+					  filename = fname;
+				  }
 			  }
-		  }
 
-		  if (ext.contains(".fb2") || ext.contains(".fb2.zip")) {
-			  try {
-				  Book b = getFB2(filename);
-				  map.put("title1", b.book_title + " " + b.first_name + " " + b.middle_name + " " + b.last_name 
-						  + " " + b.coverpage + " " + b.cover + " " + b.jpg);
-			  } catch (Exception e) {
-				  map.put("title1", e.getMessage());
+			  if (ext.contains(".fb2") || ext.contains(".fb2.zip")) {
+				  try {
+					  Book b = getFB2(filename);
+					  map.put("title1", b.book_title + " " + b.first_name + " " + b.middle_name + " " + b.last_name 
+							  + " " + b.coverpage + " " + b.cover + " " + b.jpg);
+				  } catch (Exception e) {
+					  map.put("title1", e.getMessage());
+				  }
+			  } else {
+				  map.put("title1", filename);
 			  }
-		  } else {
-			  map.put("title1", filename);
+			  map.put("title2", path.get(i));
+			  
+			  Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.pulse);
+			  map.put("image", bmp);
+			  
+			  items.add(map);
 		  }
-		  map.put("title2", path.get(i));
-		  items.add(map);
-	  }
-	  
-	  return items;
-  }
+		  
+		  return items;
+	}
   
   private String getZIP(String filename) {
 	  File outputFile = null;
