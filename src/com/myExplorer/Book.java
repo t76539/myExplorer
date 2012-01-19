@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
-import 	java.io.StringReader;
+import java.io.StringReader;
 
 public class Book {
     public String book_title = "";
@@ -180,7 +180,7 @@ public class Book {
 			return false;
 		}
 		if (cover != null) {
-			String jpg = unzip(filename, "OEBPS/" + cover);
+			unzip(filename, "OEBPS/" + cover, "/sdcard/books/unzip/cover.jpg");
 			return true;
 		}
 		
@@ -297,32 +297,72 @@ public class Book {
     }
 
     private String unzip(String zipFileName, String extFileName) {
-    	  //File outputFile = null;
-    	  String result = "";
-      	  try {
-      		  ZipFile zip = new ZipFile(zipFileName);
-      		  ZipEntry entry = zip.getEntry(extFileName);
-      	      InputStream is = zip.getInputStream(entry);
+  	  //File outputFile = null;
+  	  String result = "";
+    	  try {
+    		  ZipFile zip = new ZipFile(zipFileName);
+    		  ZipEntry entry = zip.getEntry(extFileName);
+    	      InputStream is = zip.getInputStream(entry);
 
-      	      byte buf[] = new byte[4096];
-      	      do {
-      	    	  int numread = is.read(buf, 0, 4096);
-      		      if (numread <= 0)
-      		    	  break;
-      		      else {
-      		    	  String data = new String(buf, 0, numread, "UTF-8");
-      		    	  result += data;
-      		      }
-      	      } while (true);
+    	      byte buf[] = new byte[4096];
+    	      do {
+    	    	  int numread = is.read(buf, 0, 4096);
+    		      if (numread <= 0)
+    		    	  break;
+    		      else {
+    		    	  String data = new String(buf, 0, numread, "UTF-8");
+    		    	  result += data;
+    		      }
+    	      } while (true);
 
-      	      is.close();
-      	  } catch (Exception e) {
-//      		  String msg = e.getMessage();
-      		  return null;
-      	  }
-      	  return result;
-    }
-    
+    	      is.close();
+    	  } catch (Exception e) {
+//    		  String msg = e.getMessage();
+    		  return null;
+    	  }
+    	  return result;
+  }
+  
+    private boolean unzip(String zipFileName, String extFileName, String outFileName) {
+    	
+  	  	try {
+  	  		ZipFile zip = new ZipFile(zipFileName);
+  	  		ZipEntry entry = zip.getEntry(extFileName);
+  	  		InputStream is = zip.getInputStream(entry);
+  	      
+  	  		File outputFile = new File(outFileName);
+  	  		String outputPath = outputFile.getCanonicalPath();
+  	  		String name = outputPath.substring(outputPath.lastIndexOf("/") + 1);
+  	  		outputPath = outputPath.substring(0, outputPath.lastIndexOf("/"));
+  	  		File outputDir = new File(outputPath);
+  	  		outputDir.mkdirs();
+  	  		outputFile = new File(outputPath, name);
+  	  		outputFile.createNewFile();
+  	  		FileOutputStream out = new FileOutputStream(outputFile);
+
+  	  		final int BUF_SIZE = 4096;
+  	  		byte buf[] = new byte[BUF_SIZE+1];
+  	  		int numread;
+  	  		while (0 < (numread = is.read(buf, 0, BUF_SIZE)))
+				out.write(buf, 0, numread);
+/*  	  		
+  	  		do {
+  	  			int numread = is.read(buf, 0, 4096);
+  	  			if (numread <= 0)
+  	  				break;
+  	  			else
+  	  				out.write(buf, 0, numread);
+  	  		} while (true);
+*/  	  		
+
+  	  		is.close();
+  	  		out.close();
+  	  	} catch (Exception e) {
+  	  		return false;
+  	  	}
+  	  	return true;
+  }
+  
     private String unzip(String filename) {
   	  File outputFile = null;
   	  try {
@@ -366,6 +406,6 @@ public class Book {
   	  }
   	  return outputFile.getPath();
   }
-    
+
 }
 

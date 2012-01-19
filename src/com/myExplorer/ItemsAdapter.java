@@ -2,6 +2,8 @@ package com.myExplorer;
 
 
 import java.util.List;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.io.File;
 
 public class ItemsAdapter extends ArrayAdapter<Item> {
 	private final Activity context;
@@ -34,7 +37,15 @@ public class ItemsAdapter extends ArrayAdapter<Item> {
 		if (!itemList.get(position).isDir() && b.loadFile(itemList.get(position).getPath())) {
 			title1.setText(b.book_title);
 			title2.setText(b.getAuthor());
-			imageView.setImageResource(R.drawable.fb2_32x32);
+			if (b.cover != null) {
+				File imgFile = new  File("/sdcard/books/unzip/cover.jpg");
+				if(imgFile.exists()) {
+				    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+				    imageView.setImageBitmap(myBitmap);
+				}				
+			}
+			else
+				imageView.setImageResource(R.drawable.fb2_32x32);
 		}
 		else {
 			title1.setText(name);
