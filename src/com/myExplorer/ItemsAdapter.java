@@ -38,7 +38,7 @@ public class ItemsAdapter extends ArrayAdapter<Item> {
 			title1.setText(b.book_title);
 			title2.setText(b.getAuthor());
 			if (b.cover != null) {
-				File imgFile = new  File("/sdcard/books/unzip/cover.jpg");
+				File imgFile = new  File("/sdcard/books/unzip/" + b.cover);
 				if(imgFile.exists()) {
 				    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
 				    imageView.setImageBitmap(myBitmap);
