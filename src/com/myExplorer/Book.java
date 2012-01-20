@@ -15,6 +15,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.StringReader;
+import java.io.ByteArrayOutputStream;
 
 public class Book {
     public String book_title = "";
@@ -28,7 +29,9 @@ public class Book {
     public String errorMessage = "";
     public String descr = null;
     public Bitmap bmp = null;
+    public byte[] coverData = null;
     
+    ////////////////////////////////////////////////////////////////////////////////////
     public String getAuthor() {
     	if (author == null)
     		return first_name + " " + middle_name + " " +last_name;
@@ -36,6 +39,7 @@ public class Book {
     		return author;
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////
     public boolean loadFile(String filename) {
     	String ext = getFileExt( filename.toLowerCase() );
     	
@@ -72,6 +76,7 @@ public class Book {
     	return false;
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////
     private String getFileExt(String filename) {
   	  for (int i = filename.length()-1; 0 < i; i--)
   		  if (filename.charAt(i) == '.')
@@ -79,6 +84,7 @@ public class Book {
   	  return "";
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
     private String getFullPath(String container)
 		  throws XmlPullParserException, IOException 
     {
@@ -115,6 +121,7 @@ public class Book {
 		      return "";
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////
     private boolean parseOpf(String opf)
 		  throws XmlPullParserException, IOException 
     {
@@ -169,6 +176,7 @@ public class Book {
 		      return true;
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////
     private boolean parseEPUB(String filename) 
     		  throws XmlPullParserException, IOException 
     {
@@ -180,13 +188,15 @@ public class Book {
 			return false;
 		}
 		if (cover != null) {
-			unzip(filename, "OEBPS/" + cover, "/sdcard/books/unzip/cover.jpg");
+			//unzip(filename, "OEBPS/" + cover, "/sdcard/books/unzip/cover.jpg");
+			coverData = unzip_b(filename, "OEBPS/" + cover);
 			return true;
 		}
 		
     	return true;
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////
     private boolean parseFB2(String filename) 
   		  throws XmlPullParserException, IOException 
     {
@@ -267,6 +277,7 @@ public class Book {
         return true;
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////
     // Определить кодировку файла UTF-8,Win-1251,...
     private String getEncode(String filename) {
         String header = "";
@@ -296,6 +307,7 @@ public class Book {
     	return enc;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
     private String unzip(String zipFileName, String extFileName) {
   	  //File outputFile = null;
   	  String result = "";
@@ -323,6 +335,31 @@ public class Book {
     	  return result;
   }
   
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Загружаем данные из архива в массив
+    private byte[] unzip_b(String zipFileName, String extFileName) {
+    	ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+    	
+  	  	try {
+  	  		ZipFile zip = new ZipFile(zipFileName);
+  	  		ZipEntry entry = zip.getEntry(extFileName);
+  	  		InputStream is = zip.getInputStream(entry);
+  	      
+  	  		final int BUF_SIZE = 4096;
+  	  		byte buf[] = new byte[BUF_SIZE+1];
+  	  		int numread;
+  	  		while (0 < (numread = is.read(buf, 0, BUF_SIZE))) {
+				byteBuffer.write(buf, 0, numread);
+  	  		}
+  	  		
+  	  		is.close();
+  	  	} catch (Exception e) {
+  	  		return null;
+  	  	}
+  	  	return byteBuffer.toByteArray();
+    }
+  
+    ////////////////////////////////////////////////////////////////////////////////////
     private boolean unzip(String zipFileName, String extFileName, String outFileName) {
     	
   	  	try {
@@ -345,24 +382,16 @@ public class Book {
   	  		int numread;
   	  		while (0 < (numread = is.read(buf, 0, BUF_SIZE)))
 				out.write(buf, 0, numread);
-/*  	  		
-  	  		do {
-  	  			int numread = is.read(buf, 0, 4096);
-  	  			if (numread <= 0)
-  	  				break;
-  	  			else
-  	  				out.write(buf, 0, numread);
-  	  		} while (true);
-*/  	  		
-
+  	  		
   	  		is.close();
   	  		out.close();
   	  	} catch (Exception e) {
   	  		return false;
   	  	}
   	  	return true;
-  }
+    }
   
+    ////////////////////////////////////////////////////////////////////////////////////
     private String unzip(String filename) {
   	  File outputFile = null;
   	  try {

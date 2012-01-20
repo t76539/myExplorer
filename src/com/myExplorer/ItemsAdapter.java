@@ -37,13 +37,8 @@ public class ItemsAdapter extends ArrayAdapter<Item> {
 		if (!itemList.get(position).isDir() && b.loadFile(itemList.get(position).getPath())) {
 			title1.setText(b.book_title);
 			title2.setText(b.getAuthor());
-			if (b.cover != null) {
-				File imgFile = new  File("/sdcard/books/unzip/" + b.cover);
-				if(imgFile.exists()) {
-				    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-				    imageView.setImageBitmap(myBitmap);
-				}				
-			}
+			if (b.coverData != null)
+			    imageView.setImageBitmap(BitmapFactory.decodeByteArray(b.coverData, 0, b.coverData.length));
 			else
 				imageView.setImageResource(R.drawable.fb2_32x32);
 		}
