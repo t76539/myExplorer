@@ -26,8 +26,8 @@ public class MyExplorerActivity extends ListActivity {
 	      myPath = (TextView)findViewById(R.id.path);
 //	      myPath.setTextSize(28);
 //	    getDir("/sdcard/My Files/Books");
-	      getDir("/sdcard/books");
-//	      getDir(root);
+//	      getDir("/mnt/asec/books");
+	      getDir(root);
 	}
 
 	@Override

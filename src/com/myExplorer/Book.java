@@ -1,7 +1,10 @@
 package com.myExplorer;
 
 import java.io.InputStream;
+
 import android.graphics.Bitmap;
+import android.util.Log;
+
 import java.util.Enumeration;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
@@ -249,7 +252,7 @@ public class Book {
         			if (coverpage.equals(cover))
         				in_binary = true;
         		}
-        		else if (tagName.equals("body")) break;
+ //       		else if (tagName.equals("body")) break;
         	}
         	else if(eventType == XmlPullParser.END_TAG)	{
         		String tagName = xpp.getName();
@@ -259,6 +262,7 @@ public class Book {
         		else if (tagName.equals(tag_last_name))		in_last_name = false;
         		else if (tagName.equals(tag_coverpage))		in_coverpage = false;
         		else if (tagName.equals(tag_image))			in_image = false;
+        		else if (tagName.equals(tag_binary)) 		in_binary = false;
         	}
         	else if(eventType == XmlPullParser.TEXT) {
         		if (in_book_title) 			book_title = xpp.getText();
@@ -266,7 +270,8 @@ public class Book {
         		else if (in_middle_name)	middle_name = xpp.getText();
         		else if (in_last_name)		last_name = xpp.getText();
         		else if (in_binary) {
-        			jpg = ":" + xpp.getText();
+        			jpg = xpp.getText();
+        			coverData = Base64.decode(jpg);
         		}
 //        		else if (in_coverpage && in_image)book.coverpage = "cp:" + xpp.getAttributeValue(0);
         	}
@@ -277,6 +282,23 @@ public class Book {
         return true;
     }
     
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Преобразовать изображение из строки в byte
+    private byte[] strToByte(String str) {
+    	try {
+//    		Base64.decodeToFile(str, "/mnt/asec/books/cover1.jpg");
+	    	return Base64.decode(str);
+    		/*
+			FileOutputStream out = new FileOutputStream("/sdcard/books/unzip/cv.jpg");
+			out.write(buf);
+			out.close();
+	  	  	*/
+		} catch (Exception e) {
+			System.out.print(e.getMessage());
+			return null;
+		}
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////
     // Определить кодировку файла UTF-8,Win-1251,...
     private String getEncode(String filename) {
@@ -333,9 +355,9 @@ public class Book {
     		  return null;
     	  }
     	  return result;
-  }
+    }
   
-    ////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////
     // Загружаем данные из архива в массив
     private byte[] unzip_b(String zipFileName, String extFileName) {
     	ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
@@ -434,7 +456,7 @@ public class Book {
   		  return null;
   	  }
   	  return outputFile.getPath();
-  }
-
+    }
+    
 }
 
