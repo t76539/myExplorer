@@ -1,0 +1,9 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<!--  
+2	  <item android:state_enabled="false" android:color="#333333" />
+3	  <item android:state_window_focused="false" android:color="#CCC" />
+-->
+4	  <item android:state_pressed="true" android:color="@color/black" />
+5	  <item android:state_selected="true" android:color="@color/white" />
+6	  <item android:color="@color/black" />
+7</selector>
