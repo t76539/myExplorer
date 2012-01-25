@@ -33,6 +33,7 @@ public class Book {
     public String descr = null;
     public Bitmap bmp = null;
     public byte[] coverData = null;
+    public Boolean header_err = false;
     
     ////////////////////////////////////////////////////////////////////////////////////
     public String getAuthor() {
@@ -66,6 +67,7 @@ public class Book {
     			return res;
     		} catch (Exception e) {
     			errorMessage = e.getMessage();
+    			Log.e("loadFile", "ERR1:" + errorMessage);
     			return false;
     		}
     	} else if (ext.equals(".epub")) {
@@ -73,6 +75,7 @@ public class Book {
     			return parseEPUB(filename);
     		} catch (Exception e) {
     			errorMessage = e.getMessage();
+    			Log.e("loadFile", "ERR2:" + errorMessage);
     			return false;
     		}
     	}
@@ -208,7 +211,9 @@ public class Book {
         XmlPullParser xpp = factory.newPullParser();
         
         String enc = getEncode(filename);
-        xpp.setInput( new FileInputStream(filename), enc);
+        if (header_err)
+        	filename = fixFb2Header(filename);
+        xpp.setInput( new FileInputStream(filename), enc.toUpperCase());
         int eventType = xpp.getEventType();
         
         boolean in_book_title = false;
@@ -235,10 +240,12 @@ public class Book {
         boolean in_body = false;
         
         while (eventType != XmlPullParser.END_DOCUMENT) {
-        	if(eventType == XmlPullParser.START_DOCUMENT)	;//Log.e("2","Start document");
+        	if(eventType == XmlPullParser.START_DOCUMENT)	
+        		Log.e("FB2","Start document:" + xpp.getInputEncoding() + " " + filename)
+        		;
         	else if(eventType == XmlPullParser.START_TAG){
         		String tagName = xpp.getName();
-        		Log.e("MMM", "START: " + tagName);
+        		//Log.e("MMM", "START: " + tagName);
         		if (tagName.equals(tag_book_title))			in_book_title = true;
         		else if (tagName.equals(tag_first_name))	in_first_name = true;
         		else if (tagName.equals(tag_middle_name))	in_middle_name = true;
@@ -260,7 +267,7 @@ public class Book {
         	}
         	else if(eventType == XmlPullParser.END_TAG)	{
         		String tagName = xpp.getName();
-        		Log.e("MMM", "END  : " + tagName);
+        		//Log.e("MMM", "END  : " + tagName);
         		if (tagName.equals(tag_book_title)) 		in_book_title = false;
         		else if (tagName.equals(tag_first_name))	in_first_name = false;
         		else if (tagName.equals(tag_middle_name))	in_middle_name = false;
@@ -272,7 +279,7 @@ public class Book {
         			in_body = false;
         	}
         	else if(eventType == XmlPullParser.TEXT) {
-        		Log.e("MMM", "text: " + xpp.getText());
+        		//Log.e("MMM", "text: " + xpp.getText());
         		if (in_book_title) 			book_title = xpp.getText();
         		else if (in_first_name)		first_name = xpp.getText();
         		else if (in_middle_name)	middle_name = xpp.getText();
@@ -285,38 +292,74 @@ public class Book {
         	}
         	eventType = xpp.next();
         }
-        
 
-//        return book.book_title + " " + book.first_name + " " + book.middle_name + " " + book.last_name;
+        if (header_err) {
+        	File dfile = new File(filename);
+        	if (dfile.exists())
+        		dfile.delete();        	
+        }
+        
+		Log.e("FB2", "OK!");
         return true;
-    }
-    
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Преобразовать изображение из строки в byte
-    private byte[] strToByte(String str) {
-    	try {
-//    		Base64.decodeToFile(str, "/mnt/asec/books/cover1.jpg");
-	    	return Base64.decode(str);
-    		/*
-			FileOutputStream out = new FileOutputStream("/sdcard/books/unzip/cv.jpg");
-			out.write(buf);
-			out.close();
-	  	  	*/
-		} catch (Exception e) {
-			System.out.print(e.getMessage());
-			return null;
-		}
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
+    // Исправить заголовок Fb2-файла
+    private String fixFb2Header(String filename) {
+    	String fixFilename = filename + ".fix";
+		FileInputStream is = null;
+		FileOutputStream out = null;
+    	try {
+    		is = new FileInputStream(filename);
+            int data = is.read();
+            Boolean start = false;
+            while (data != -1) {
+            	char ch = (char)data;
+            	if (ch == '<') {
+            		start = true;
+            		break;
+            	}
+            	data = is.read();
+            }
+            
+            if (!start) {
+            	is.close();
+            	return "";
+            }
+            
+  	  		out = new FileOutputStream(fixFilename);            
+  	  		final int BUF_SIZE = 4096;
+  	  		byte buf[] = new byte[BUF_SIZE+1];
+  	  		int numread;
+  	  		while (0 < (numread = is.read(buf, 0, BUF_SIZE))) {
+				out.write(buf, 0, numread);
+  	  		}
+  	  		
+  	    	is.close();
+  	    	out.close();
+    	} catch (Exception e) {
+    		return ""; 
+    	}
+    	
+    	return fixFilename;
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////
     // Определить кодировку файла UTF-8,Win-1251,...
     private String getEncode(String filename) {
+    	Boolean start = false;
         String header = "";
     	try {
     		InputStreamReader r = new InputStreamReader( new FileInputStream(filename) );
             int data = r.read();
             while (data != -1) {
             	header = header + (char)data;
+            	if (!start && header.charAt(0) != '<') {
+            		header_err = true;
+            		Log.e("getEncode", "Header error!");
+            	}
+            	start = true;
+            	
             	if (header.indexOf("?>") != -1)
             		break;
             	data = r.read();
@@ -340,15 +383,15 @@ public class Book {
 
     ////////////////////////////////////////////////////////////////////////////////////
     private String unzip(String zipFileName, String extFileName) {
-  	  //File outputFile = null;
-  	  String result = "";
-    	  try {
-    		  ZipFile zip = new ZipFile(zipFileName);
-    		  ZipEntry entry = zip.getEntry(extFileName);
-    	      InputStream is = zip.getInputStream(entry);
+    	//File outputFile = null;
+  	  	String result = "";
+    	try {
+    		ZipFile zip = new ZipFile(zipFileName);
+    		ZipEntry entry = zip.getEntry(extFileName);
+    	    InputStream is = zip.getInputStream(entry);
 
-    	      byte buf[] = new byte[4096];
-    	      do {
+    	    byte buf[] = new byte[4096];
+    	    do {
     	    	  int numread = is.read(buf, 0, 4096);
     		      if (numread <= 0)
     		    	  break;
@@ -356,14 +399,14 @@ public class Book {
     		    	  String data = new String(buf, 0, numread, "UTF-8");
     		    	  result += data;
     		      }
-    	      } while (true);
+    	    } while (true);
 
-    	      is.close();
-    	  } catch (Exception e) {
+    	    is.close();
+    	} catch (Exception e) {
 //    		  String msg = e.getMessage();
-    		  return null;
-    	  }
-    	  return result;
+    		return null;
+    	}
+    	return result;
     }
   
     //////////////////////////////////////////////////////////////////////////////////
@@ -423,6 +466,7 @@ public class Book {
     }
   
     ////////////////////////////////////////////////////////////////////////////////////
+    // Распаковать из файла в строку первые 16K
     private String unzip(String filename) {
   	  File outputFile = null;
   	  try {
@@ -448,12 +492,11 @@ public class Book {
   	          byte buf[] = new byte[16384];
   	          do {
   		            int numread = is.read(buf);
-  		            if (numread <= 0) {
+  		            if (numread <= 0)
   		            	break;
-  		            } else {
+  		            else
   		            	out.write(buf, 0, numread);
-  		            }
-  		            //break;
+  		            //break; // Один блок
   	          } while (true);
 
   	          is.close();

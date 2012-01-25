@@ -45,9 +45,9 @@ public class MyExplorerActivity extends ListActivity {
 	    myPath.setOnClickListener(cl);
 	    myImage.setOnClickListener(cl);
 	      
-//	      getDir("/mnt/asec/test");
+	      getDir("/mnt/asec/books");
 //		    getDir("/sdcard/My Files/Books");
-	      getDir(root);
+//	      getDir(root);
 	}
 
 	@Override
