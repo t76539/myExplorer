@@ -3,5 +3,15 @@
 
     <string name="hello">Hello World, MyExplorerActivity!</string>
     <string name="app_name">MyExplorer</string>
-
+    
+ 	<color name="white">#FFFFFF</color>
+ 	<color name="black">#000000</color>
+	<color name="default_text_color">#FFEAEAEA</color>
+	
+	<color name="color_pressed">#FF0000</color> 	
+	<color name="color_no_pressed">#00FF00</color>
+	 	
+	<color name="color_selected">#1F1F1F</color> 	
+	<color name="color_no_selected">#FFFFFF</color> 	
+			
 </resources>

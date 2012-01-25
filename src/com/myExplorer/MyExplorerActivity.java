@@ -9,24 +9,44 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.net.Uri;
 import java.util.Arrays;
+import android.view.Window;
+import android.view.WindowManager;
 
 public class MyExplorerActivity extends ListActivity {
 	private List<Item> itemList = null;
 	private String root="/";
+	private String dirParent = null;
 	private TextView myPath;
+	private ImageView myImage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-	      super.onCreate(savedInstanceState);
-	      setContentView(R.layout.main);
-	      myPath = (TextView)findViewById(R.id.path);
-//	      myPath.setTextSize(28);
-//	    getDir("/sdcard/My Files/Books");
-//	      getDir("/mnt/asec/books");
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);	// Убираем заголовок
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);	// Полный экран  		
+	    setContentView(R.layout.main);
+	    myPath = (TextView)findViewById(R.id.path);
+	    myImage = (ImageView)findViewById(R.id.image);
+	    
+	    View.OnClickListener cl = new View.OnClickListener() {
+	    	public void onClick(View v) {
+	    		if (dirParent != null)
+					getDir(dirParent);
+			}
+		}; 
+	    		
+	    myPath.setOnClickListener(cl);
+	    myImage.setOnClickListener(cl);
+	      
+//	      getDir("/mnt/asec/test");
+//		    getDir("/sdcard/My Files/Books");
 	      getDir(root);
 	}
 
@@ -61,7 +81,6 @@ public class MyExplorerActivity extends ListActivity {
 	}
 
 	private void getDir(String dirPath) {
-		myPath.setText("Положение: " + dirPath);
 	    itemList = new ArrayList<Item>();
 
 	    File f = new File(dirPath);
@@ -74,7 +93,12 @@ public class MyExplorerActivity extends ListActivity {
 		    files[i] = pairs[i].f;
 
 	    if(!dirPath.equals(root)) {
-	        itemList.add(new Item("..", f.getParent(), true));
+	    	dirParent = f.getParent();
+			myPath.setText("../ (" + dirPath + ")");
+	    }
+	    else {
+	    	dirParent = null;
+			myPath.setText("../");
 	    }
 
 	      for (int i=0; i < files.length; i++) {

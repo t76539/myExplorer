@@ -3,19 +3,43 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#FFFFFF"
     >
-    
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/left" />
+
+        <TextView
+            android:id="@+id/path"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_vertical"
+            android:text="@string/app_name"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
 	<TextView
-		android:id="@+id/path"
-    	android:layout_width="fill_parent" 
-    	android:layout_height="wrap_content" 
-    />
+	    android:id="@+id/textView1"
+	    android:layout_width="fill_parent"
+	    android:layout_height="1px"
+	    android:background="#000000" />
 
 	<ListView
 		android:id="@android:id/list"
 		android:layout_width="fill_parent" 
-    	android:layout_height="wrap_content"	
-	/>
+    	android:layout_height="wrap_content"
+    	style="@style/CustomListView" >
+	</ListView>
 	<TextView
 		android:id="@android:id/empty"
 		android:layout_width="fill_parent" 

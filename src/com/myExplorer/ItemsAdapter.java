@@ -46,9 +46,9 @@ public class ItemsAdapter extends ArrayAdapter<Item> {
 			title1.setText(name);
 			title2.setText(itemList.get(position).getPath());
 			if (itemList.get(position).isDir())
-				imageView.setImageResource(R.drawable.ic_launcher);
+				imageView.setImageResource(R.drawable.folder);
 			else
-				imageView.setImageResource(R.drawable.pulse);
+				imageView.setImageResource(R.drawable.file);
 		}
 
 		return rowView;

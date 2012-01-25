@@ -232,10 +232,13 @@ public class Book {
         boolean in_binary = false;
         String tag_binary = "binary";
         
+        boolean in_body = false;
+        
         while (eventType != XmlPullParser.END_DOCUMENT) {
         	if(eventType == XmlPullParser.START_DOCUMENT)	;//Log.e("2","Start document");
         	else if(eventType == XmlPullParser.START_TAG){
         		String tagName = xpp.getName();
+        		Log.e("MMM", "START: " + tagName);
         		if (tagName.equals(tag_book_title))			in_book_title = true;
         		else if (tagName.equals(tag_first_name))	in_first_name = true;
         		else if (tagName.equals(tag_middle_name))	in_middle_name = true;
@@ -252,10 +255,12 @@ public class Book {
         			if (coverpage.equals(cover))
         				in_binary = true;
         		}
- //       		else if (tagName.equals("body")) break;
+        		else if (tagName.equals("body")) 
+        			in_body = true;
         	}
         	else if(eventType == XmlPullParser.END_TAG)	{
         		String tagName = xpp.getName();
+        		Log.e("MMM", "END  : " + tagName);
         		if (tagName.equals(tag_book_title)) 		in_book_title = false;
         		else if (tagName.equals(tag_first_name))	in_first_name = false;
         		else if (tagName.equals(tag_middle_name))	in_middle_name = false;
@@ -263,8 +268,11 @@ public class Book {
         		else if (tagName.equals(tag_coverpage))		in_coverpage = false;
         		else if (tagName.equals(tag_image))			in_image = false;
         		else if (tagName.equals(tag_binary)) 		in_binary = false;
+        		else if (tagName.equals("body")) 
+        			in_body = false;
         	}
         	else if(eventType == XmlPullParser.TEXT) {
+        		Log.e("MMM", "text: " + xpp.getText());
         		if (in_book_title) 			book_title = xpp.getText();
         		else if (in_first_name)		first_name = xpp.getText();
         		else if (in_middle_name)	middle_name = xpp.getText();
@@ -277,6 +285,7 @@ public class Book {
         	}
         	eventType = xpp.next();
         }
+        
 
 //        return book.book_title + " " + book.first_name + " " + book.middle_name + " " + book.last_name;
         return true;
@@ -444,7 +453,7 @@ public class Book {
   		            } else {
   		            	out.write(buf, 0, numread);
   		            }
-  		            break;
+  		            //break;
   	          } while (true);
 
   	          is.close();

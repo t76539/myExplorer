@@ -2,14 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal" >
-
-    <ImageView
+    android:orientation="horizontal"
+    android:background="@color/list_item_bg" 
+    >
+    <ImageView
         android:id="@+id/image"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="fill"
         android:src="@drawable/ic_launcher" />
+    
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -21,14 +23,18 @@
     android:id="@+id/rowtext"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:textSize="20sp" />
-
+    android:textSize="20sp"
+    android:textColor="@drawable/item_list" 
+    />
+        
 <TextView
     android:id="@+id/rowtext2"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:text="@string/hello"
-    android:textSize="12sp" />
+    android:textSize="12sp" 
+    android:textColor="@drawable/item_list" 
+    />
 
     </LinearLayout>
 
