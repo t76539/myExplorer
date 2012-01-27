@@ -34,6 +34,7 @@ public class Book {
     public Bitmap bmp = null;
     public byte[] coverData = null;
     public Boolean header_err = false;
+    public Boolean is_book = false;
     
     ////////////////////////////////////////////////////////////////////////////////////
     public String getAuthor() {

@@ -33,8 +33,8 @@ public class ItemsAdapter extends ArrayAdapter<Item> {
 		ImageView imageView = (ImageView) rowView.findViewById(R.id.image);
 		
 		String name = itemList.get(position).getName();
-		Book b = new Book();
-		if (!itemList.get(position).isDir() && b.loadFile(itemList.get(position).getPath())) {
+		if (!itemList.get(position).isDir() && itemList.get(position).isBook()) {
+			Book b = itemList.get(position).book;
 			title1.setText(b.book_title);
 			title2.setText(b.getAuthor());
 			if (b.coverData != null)
