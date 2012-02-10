@@ -30,7 +30,8 @@ public class MyExplorerActivity extends ListActivity {
 	private ImageView myImage;
 	private static String pathDir;
 	private static String parentDir = "/";
-
+	private static ProgressDialog dialog;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,10 +51,10 @@ public class MyExplorerActivity extends ListActivity {
 	    		
 	    myPath.setOnClickListener(cl);
 	    myImage.setOnClickListener(cl);
-	      
-//	      runDir("/mnt/asec/books");
+
+//	    	runDir("/mnt/asec/books");
 //		    getDir("/sdcard/My Files/Books");
-	      runDir(root);
+	    	runDir(root);
 	}
 
 	@Override
@@ -89,8 +90,12 @@ public class MyExplorerActivity extends ListActivity {
 	private void runDir(String dirPath) {
         setTitle(dirPath);
 		pathDir = dirPath;
-		final ProgressDialog dialog = ProgressDialog.show(MyExplorerActivity.this, "", 
-                "Loading. Please wait...", true);
+		//dialog = ProgressDialog.show(MyExplorerActivity.this, "", "Loading. Please wait...", true);
+
+		dialog = new ProgressDialog(MyExplorerActivity.this);
+		dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		dialog.setMessage("Загрузка");
+		dialog.show();
 		
         new Thread(new Runnable() {
             public void run() {
@@ -117,7 +122,11 @@ public class MyExplorerActivity extends ListActivity {
 	    File[] files = f.listFiles();
 	    Pair[] pairs = new Pair[files.length];
 	    Book[] books = new Book[files.length];
+	    
+		dialog.setMax(files.length);
+	    
 		for (int i = 0; i < files.length; i++) {
+			dialog.setProgress(i);
 	    	books[i] = new Book();
 		    if (!files[i].isDirectory()) {
 		    	books[i].is_book = books[i].loadFile(files[i].getPath());
@@ -129,6 +138,7 @@ public class MyExplorerActivity extends ListActivity {
 		Arrays.sort(pairs);
 
 		for (int i=0; i < files.length; i++) {
+			//dialog.setProgress(value);
 			File file = pairs[i].f;
 	        itemList.add(new Item(file.getName(), file.getPath(), file.isDirectory(), pairs[i].b));
 		}
@@ -178,9 +188,6 @@ public class MyExplorerActivity extends ListActivity {
 	        	f2_name = c.b.book_title;
 	        
 	        int res = f1_name.compareTo(f2_name);
-	        Log.e("F1", ":" + f1_name);
-	        Log.e("F2", ":" + f2_name);
-	        Log.e("CMP", "=" + res);
 	        
 	        return res;
 	    }
